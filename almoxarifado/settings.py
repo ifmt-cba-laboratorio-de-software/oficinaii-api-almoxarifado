@@ -4,6 +4,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'troque-esta-chave-para-producao'
 DEBUG = True
+USE_I18N = True
+USE_L10N = True
+LANGUAGE_CODE = 'pt-br'
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
