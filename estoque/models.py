@@ -23,6 +23,12 @@ class Item(models.Model):
     estoque_maximo = models.IntegerField(default=0)
     quantidade_atual = models.IntegerField(default=0)
 
+    # NOVO: Calcula o valor total deste item em estoque
+    @property
+    def valor_total_estoque(self):
+        # O cálculo deve ser feito com o custo (valor_unitario)
+        return self.quantidade_atual * self.valor_unitario
+
     def __str__(self):
         return f"{self.codigo} - {self.descricao}"
 

@@ -20,5 +20,6 @@ urlpatterns = [
     path('fornecedor/novo/', views.fornecedor_create, name='fornecedor_create'),
     path('fornecedor/<int:pk>/editar/', views.fornecedor_edit, name='fornecedor_edit'),
     path('fornecedor/<int:pk>/excluir/', views.fornecedor_delete, name='fornecedor_delete'),
-    path('buscar/fornecedor/', views.buscar_fornecedor, name='buscar_fornecedor'), # <-- NOVA ROTA
+    path('buscar/fornecedor/', views.buscar_fornecedor, name='buscar_fornecedor'), #
+    path('inventario/periodico/', views.relatorio_inventario_periodico, name='relatorio_inventario_periodico'),
 ]
