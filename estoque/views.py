@@ -288,3 +288,67 @@ def buscar_fornecedor(request):
 
     # Renderiza APENAS o template parcial
     return render(request, 'estoque/partials/tabela_fornecedores.html', {'fornecedores': fornecedores})
+@login_required
+@permission_required('estoque.view_cliente', raise_exception=True)
+def cliente_list(request):
+    #clientes = Cliente.objects.all().order_by('nome')
+    #paginator = Paginator(clientes, 20)
+    page = request.GET.get('page')
+    #clientes = paginator.get_page(page)
+    return render(request, 'estoque/clientes.html')
+
+@login_required
+@permission_required('estoque.add_cliente', raise_exception=True)
+def cliente_create(request):
+    if request.method == 'POST':
+        form = ClienteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cliente criado com sucesso.')
+            return redirect('cliente_list')
+    else:
+        form = ClienteForm()
+    return render(request, 'estoque/cliente_form.html', {'form': form})
+
+@login_required
+@permission_required('estoque.change_cliente', raise_exception=True)
+def cliente_edit(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    if request.method == 'POST':
+        form = ClienteForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cliente atualizado com sucesso.')
+            return redirect('cliente_list')
+    else:
+        form = ClienteForm(instance=cliente)
+    return render(request, 'estoque/cliente_form.html', {'form': form, 'cliente': cliente})
+
+@login_required
+@permission_required('estoque.delete_cliente', raise_exception=True)
+def cliente_delete(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    # Se houver restrições (ex.: pedidos vinculados), trate aqui antes de excluir
+    cliente.delete()
+    messages.success(request, 'Cliente removido com sucesso.')
+    return redirect('cliente_list')
+
+@login_required
+def cliente_detail(request, pk):
+    cliente = get_object_or_404(Cliente, pk=pk)
+    return render(request, 'estoque/cliente_detail.html', {'cliente': cliente})
+
+@login_required
+def buscar_cliente(request):
+    search_text = request.GET.get('q', '').strip()
+
+    if search_text:
+        clientes = Cliente.objects.filter(
+            Q(nome__icontains=search_text) |
+            Q(cpf_cnpj__icontains=search_text) |
+            Q(email__icontains=search_text)
+        ).order_by('nome')
+    else:
+        clientes = Cliente.objects.all().order_by('nome')[:50]
+
+    return render(request, 'estoque/partials/tabela_clientes.html', {'clientes': clientes})

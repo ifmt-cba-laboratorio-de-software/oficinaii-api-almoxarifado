@@ -22,4 +22,11 @@ urlpatterns = [
     path('fornecedor/<int:pk>/excluir/', views.fornecedor_delete, name='fornecedor_delete'),
     path('buscar/fornecedor/', views.buscar_fornecedor, name='buscar_fornecedor'), #
     path('inventario/periodico/', views.relatorio_inventario_periodico, name='relatorio_inventario_periodico'),
+
+     # Rotas de cliente
+    path('clientes/', views.cliente_list, name='cliente_list'),
+    path('cliente/novo/', views.cliente_create, name='cliente_create'),
+    path('cliente/buscar/', views.cliente_create, name='buscar_cliente'),
+    path('cliente/tabela/', views.cliente_create, name='tabela_clientes'),
 ]
+
