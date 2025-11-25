@@ -52,10 +52,12 @@ class Movimentacao(models.Model):
         if self.tipo == 'ENTRADA' or self.tipo == 'DEVOLUÇÃO':
             self.item.quantidade_atual += self.quantidade
         elif self.tipo in ('SAIDA', 'RETIRADA'):
-            self.item.quantidade_atual -= self.quantidade
-            if self.item.quantidade_atual < 0:
-                self.item.quantidade_atual = 0
-        self.item.save()
+            if self.item.quantidade_atual >= self.quantidade:
+                self.item.quantidade_atual -= self.quantidade
+            else: 
+                if self.item.quantidade_atual < 0:
+                    self.item.quantidade_atual = 0
+        
 
     def __str__(self):
         return f"{self.tipo} - {self.item.descricao} ({self.quantidade})"
