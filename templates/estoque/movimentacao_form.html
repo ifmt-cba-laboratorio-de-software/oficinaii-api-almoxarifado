@@ -1,3 +1,4 @@
+<!-- ...existing code... -->
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
@@ -12,7 +13,13 @@
             📝 Registrar Movimentação
           </h3>
 
-          <form method="post" novalidate>
+          <!-- adiciona data-* com escapejs para evitar injeção -->
+          <form id="mov-form"
+                method="post"
+                novalidate
+                data-item-desc="{{ item.descricao|default_if_none:''|escapejs }}"
+                data-quant="{{ item.quantidade_atual|default:0 }}"
+                data-min="{{ item.estoque_minimo|default:0 }}">
             {% csrf_token %}
             {{ form|crispy }}
 
@@ -20,7 +27,8 @@
               <a href="{% url 'index' %}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Cancelar
               </a>
-              <button type="submit" class="btn btn-primary">
+              <!-- remove onclick inline -->
+              <button id="mov-submit" type="submit" class="btn btn-primary">
                 <i class="bi bi-check-circle"></i> Registrar
               </button>
             </div>
@@ -35,3 +43,60 @@
 <!-- Bootstrap Icons (para os ícones de botões) -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 {% endblock %}
+
+<!-- SweetAlert2 (verifique se já não está incluído no base.html) -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+/*
+  Comportamento:
+  - Ao submeter o formulário, verifica se quantidade_atual <= estoque_minimo.
+  - Se sim, mostra modal: "Reabastecer" (redireciona) ou "Continuar" (envia o formulário).
+  - Se não, envia o formulário normalmente.
+*/
+(function(){
+  const form = document.getElementById('mov-form');
+  if (!form) return;
+
+  form.addEventListener('submit', function(e){
+    // lê valores dos data-attributes
+    const itemDesc = form.dataset.itemDesc || '';
+    const quant = parseInt(form.dataset.quant, 10) || 0;
+    const min = parseInt(form.dataset.min, 10) || 0;
+
+    // só abre modal se o estoque atual estiver abaixo ou igual ao mínimo
+    if (quant <= min) {
+      e.preventDefault();
+
+      Swal.fire({
+        title: 'Estoque no mínimo',
+        html: `O item '<strong>${itemDesc}</strong>' está no mínimo.<br>
+               Atual: <strong>${quant}</strong> — Mínimo: <strong>${min}</strong>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Reabastecer',
+        cancelButtonText: 'Continuar sem reabastecer',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // redireciona para uma rota de reabastecimento — ajuste a URL conforme sua app
+          const urlReabastecer = "{% url 'requisitar_reabastecimento' item.id %}";
+          if (urlReabastecer) {
+            window.location.href = urlReabastecer;
+          } else {
+            // se não houver URL, apenas submete
+            form.submit();
+          }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          // o usuário optou por continuar — submete o formulário
+          form.submit();
+        }
+        // se dismiss for outro (ex: ESC, clique fora), não faz nada
+      });
+    }
+    // caso contrário, permite envio normal (não impedimos o submit)
+  });
+})();
+</script>
+<!-- ...existing code... -->
